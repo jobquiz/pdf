@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
+        /* সকল CSS স্টাইল একই আছে */
         * {
             margin: 0;
             padding: 0;
@@ -699,7 +700,7 @@
                 <input type="number" id="lineGapControl" min="1.2" max="2" step="0.1" value="1.4">
                 <button class="btn btn-primary" id="applyLineGap">
                     <i class="fas fa-check"></i> OK
-                </button>
+                    </button>
             </div>
             
             <div class="compact-mode">
@@ -1134,7 +1135,7 @@
                 }
             }
             
-            // Update preview function
+            // Update preview function - FIXED: প্রতিটি বিষয়ের জন্য আলাদা সিরিয়াল
             function updatePreview() {
                 previewArea.innerHTML = '';
                 
@@ -1173,10 +1174,10 @@
                     if (!subjectGroups[qa.subject]) {
                         subjectGroups[qa.subject] = [];
                     }
-                    subjectGroups[qa.subject].push({...qa, index});
+                    subjectGroups[qa.subject].push({...qa, originalIndex: index});
                 });
                 
-                // Add content by subject - START FROM TOP
+                // Add content by subject
                 Object.keys(subjectGroups).forEach(subject => {
                     const subjectQAs = subjectGroups[subject];
                     
@@ -1187,6 +1188,9 @@
                     applySubjectHeaderStyles(subjectHeader);
                     currentPage.appendChild(subjectHeader);
                     itemsOnPage++;
+                    
+                    // প্রতিটি বিষয়ের জন্য আলাদা সিরিয়াল কাউন্টার
+                    let subjectQuestionCount = 0;
                     
                     // Add Q&A items for this subject
                     subjectQAs.forEach((qa, qaIndex) => {
@@ -1209,9 +1213,8 @@
                         qaItem.className = 'qa-item';
                         qaItem.style.marginBottom = gapSize + 'px';
                         
-                        // Use the global question index for serial number, not the subject-specific index
-                        const globalQuestionIndex = qaList.findIndex(item => item === qa);
-                        const serialNumber = getBengaliSerialNumber(globalQuestionIndex);
+                        // Use subject-specific question count for serial number
+                        const serialNumber = getBengaliSerialNumber(subjectQuestionCount);
                         
                         const questionDiv = document.createElement('div');
                         questionDiv.className = 'question';
@@ -1229,12 +1232,12 @@
                         const editButton = document.createElement('button');
                         editButton.className = 'btn-edit-qa';
                         editButton.innerHTML = '<i class="fas fa-edit"></i> এডিট';
-                        editButton.addEventListener('click', () => editQA(qa.index));
+                        editButton.addEventListener('click', () => editQA(qa.originalIndex));
                         
                         const deleteButton = document.createElement('button');
                         deleteButton.className = 'btn-delete';
                         deleteButton.innerHTML = '<i class="fas fa-trash"></i> মুছুন';
-                        deleteButton.addEventListener('click', () => deleteQA(qa.index));
+                        deleteButton.addEventListener('click', () => deleteQA(qa.originalIndex));
                         
                         actionsDiv.appendChild(editButton);
                         actionsDiv.appendChild(deleteButton);
@@ -1245,6 +1248,9 @@
                         
                         currentPage.appendChild(qaItem);
                         itemsOnPage++;
+                        
+                        // Increment subject-specific counter
+                        subjectQuestionCount++;
                     });
                 });
             }
@@ -1331,7 +1337,7 @@
                 window.print();
             }
             
-            // PDF download function - COMPLETELY FIXED
+            // PDF download function
             function downloadPDF() {
                 // Show loading message
                 const originalText = pdfBtn.innerHTML;
@@ -1441,9 +1447,11 @@
                 Object.keys(subjectGroups).forEach(subject => {
                     textContent += `বিষয়: ${subject}\n\n`;
                     
+                    let subjectQuestionCount = 0;
+                    
                     subjectGroups[subject].forEach((qa, index) => {
-                        const globalIndex = qaList.findIndex(item => item === qa);
-                        const serialNumber = getBengaliSerialNumber(globalIndex);
+                        const serialNumber = getBengaliSerialNumber(subjectQuestionCount);
+                        subjectQuestionCount++;
                         textContent += `${serialNumber}) প্রশ্ন: ${qa.question}\n`;
                         textContent += `   উত্তর: ${qa.answer}\n\n`;
                     });
