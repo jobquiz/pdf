@@ -846,7 +846,7 @@
             let currentTextColor = "#000000";
             let isBold = false;
             let isItalic = false;
-            let gapSize = 10; // Reduced gap for top alignment
+            let gapSize = 10;
             let lineGap = 1.4;
             let isCompactMode = true;
             
@@ -867,7 +867,19 @@
             // Page background colors
             let pageBgColorsMap = {};
             
-            let serialNumbers = ['১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯', '১০', '১১', '১২', '১৩', '১৪', '১৫', '১৬', '১৭', '১৮', '১৯', '২০'];
+            // Bengali numbers from 1 to 100
+            const bengaliNumbers = [
+                '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯', '১০',
+                '১১', '১২', '১৩', '১৪', '১৫', '১৬', '১৭', '১৮', '১৯', '২০',
+                '২১', '২২', '২৩', '২৪', '২৫', '২৬', '২৭', '২৮', '২৯', '৩০',
+                '৩১', '৩২', '৩৩', '৩৪', '৩৫', '৩৬', '৩৭', '৩৮', '৩৯', '৪০',
+                '৪১', '৪২', '৪৩', '৪৪', '৪৫', '৪৬', '৪৭', '৪৮', '৪৯', '৫০',
+                '৫১', '৫২', '৫৩', '৫৪', '৫৫', '৫৬', '৫৭', '৫৮', '৫৯', '৬০',
+                '৬১', '৬২', '৬৩', '৬৪', '৬৫', '৬৬', '৬৭', '৬৮', '৬৯', '৭০',
+                '৭১', '৭২', '৭৩', '৭৪', '৭৫', '৭৬', '৭৭', '৭৮', '৭৯', '৮০',
+                '৮১', '৮২', '৮৩', '৮৪', '৮৫', '৮৬', '৮৭', '৮৮', '৮৯', '৯০',
+                '৯১', '৯২', '৯৩', '৯৪', '৯৫', '৯৬', '৯৭', '৯৮', '৯৯', '১০০'
+            ];
             
             // Event listeners
             addBtn.addEventListener('click', addQA);
@@ -1112,6 +1124,16 @@
                 updatePreview();
             }
             
+            // Get Bengali serial number
+            function getBengaliSerialNumber(index) {
+                // Use the full list of Bengali numbers, if beyond 100, use regular numbers
+                if (index < bengaliNumbers.length) {
+                    return bengaliNumbers[index];
+                } else {
+                    return (index + 1).toString();
+                }
+            }
+            
             // Update preview function
             function updatePreview() {
                 previewArea.innerHTML = '';
@@ -1187,7 +1209,9 @@
                         qaItem.className = 'qa-item';
                         qaItem.style.marginBottom = gapSize + 'px';
                         
-                        const serialNumber = serialNumbers[qaIndex % serialNumbers.length];
+                        // Use the global question index for serial number, not the subject-specific index
+                        const globalQuestionIndex = qaList.findIndex(item => item === qa);
+                        const serialNumber = getBengaliSerialNumber(globalQuestionIndex);
                         
                         const questionDiv = document.createElement('div');
                         questionDiv.className = 'question';
@@ -1418,7 +1442,9 @@
                     textContent += `বিষয়: ${subject}\n\n`;
                     
                     subjectGroups[subject].forEach((qa, index) => {
-                        textContent += `${index + 1}) প্রশ্ন: ${qa.question}\n`;
+                        const globalIndex = qaList.findIndex(item => item === qa);
+                        const serialNumber = getBengaliSerialNumber(globalIndex);
+                        textContent += `${serialNumber}) প্রশ্ন: ${qa.question}\n`;
                         textContent += `   উত্তর: ${qa.answer}\n\n`;
                     });
                     
